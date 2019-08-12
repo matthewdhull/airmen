@@ -3,4 +3,5 @@
 *.RData
 *.Rdata
 *.Rproj
+.DS_Store
 .Rproj.user/
