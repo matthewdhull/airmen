@@ -1,7 +1,7 @@
-FAA ATP Issuances, 2012-2017
+FAA ATP Issuances, 2012-2018
 ================
 Matthew Hull
-2018-08-07
+2019-08-12
 
 ``` r
 library(readxl)
@@ -9,8 +9,8 @@ library(ggplot2)
 ```
 
 ``` r
-# bring in from original data files:
-yrs <- as.character(seq(2012,2017,1))
+# bring in available data from last 5 years from original data files:
+yrs <- as.character(seq(2013,2018,1))
 
 
 if(!dir.exists("airmandata")) {
@@ -28,6 +28,9 @@ airman_files <- dir(path="airmandata",pattern="*.xlsx")
 ```
 
 ``` r
+# add in yr 2012, now archived
+yrs <- as.character(seq(2012,2018,1))
+
 df <- data.frame( matrix(c(yrs,rep(NA,length(yrs))), nrow=length(yrs), ncol=2) )
 colnames(df) <- c("year", "atps")
 df$atps <- as.numeric(df$atps)
@@ -36,12 +39,11 @@ df$year <- as.numeric(as.character(df$year))
 for (a in airman_files) {
   yr <- substr(a,1,4)
   fn <- paste("airmandata/",a,sep="")
-  d <- read_excel( fn
+  d <- read_xlsx( fn
                    , sheet = "Table 16"
-                   , col_types = c("text", "skip", "text", "skip", "skip", "skip", "skip", "skip", "skip", "skip"))
-  
+                   , col_types = "guess")
   cnames <- d$`Table 16`
-  d <- as.data.frame(t(d$X__1))
+  d <- as.data.frame(t(d$...3))
   colnames(d) <- cnames
   atp_total <- as.numeric(as.character(d$`Airline Transport`))
   idx <- which(df$year==as.numeric(yr))
@@ -51,6 +53,8 @@ for (a in airman_files) {
 ```
 
 ``` r
+title <- paste(yrs[1],"-",tail(yrs,1),"Original ATP Issuances")
+
 ggplot(df, aes(x=year,y=atps)) +
   geom_bar(stat="identity", aes(fill=year), show.legend = F, width=.5) +
   ylim(0, max(df$atps)+2500) +
@@ -64,7 +68,8 @@ ggplot(df, aes(x=year,y=atps)) +
            , y=max(df$atps)+2000) +
   xlab("Year") +
   ylab("Count") +
-  ggtitle("2012-2017 Original ATP Issuances")
+  scale_fill_viridis_c() +
+  ggtitle(title)
 ```
 
 <img src="atps_files/figure-gfm/plots-1.png" width="672" />
